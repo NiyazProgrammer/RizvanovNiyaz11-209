@@ -63,6 +63,28 @@ python boolean_search.py -q "(python AND код) OR telegram"
 
 Код: [`boolean_search.py`](boolean_search.py).
 
+## TF-IDF по документам (термины и леммы)
+
+Нужны [`tokens.txt`](tokens.txt) и [`lemmas.txt`](lemmas.txt) (сначала `python tokenize_lemmatize.py`), каталог [`corpus/`](corpus/).
+
+```bash
+python tfidf_export.py
+python tfidf_export.py --sparse   # только ненулевой tf в документе (меньше строк)
+```
+
+- **Выход:** каталоги [`tfidf_terms/`](tfidf_terms/) и [`tfidf_lemmas/`](tfidf_lemmas/) — по файлу `NNN.txt` на документ `corpus/NNN.txt`.
+- **Строка:** `<термин или лемма><пробел><idf><пробел><tf-idf>` (UTF-8, фиксированный порядок как в `tokens.txt` / строках `lemmas.txt`).
+
+**Формулы** (натуральный логарифм): \(|d|\) — сумма частот отфильтрованных токенов в документе;  
+\(\text{tf}_{\text{терм}} = \text{count}(t,d)/|d|\);  
+\(\text{tf}_{\text{лемма}} = \sum_{w \in \text{формы леммы}} \text{count}(w,d) / |d|\);  
+\(\text{idf} = \ln\frac{N+1}{\text{df}+1}\); **tf-idf** = tf × idf.  
+\(N\) — число документов; **df** — в скольких документах встречается термин / лемма (сумма частот форм > 0).
+
+Код: [`tfidf_export.py`](tfidf_export.py); частоты токенов — [`count_tokens_in_text`](corpus_text.py) в [`corpus_text.py`](corpus_text.py).
+
+Папки `tfidf_*` в [`.gitignore`](.gitignore) — при сдаче сгенерируйте локально или добавьте в коммит принудительно.
+
 ## Зависимости
 
 См. [`requirements.txt`](requirements.txt): `requests`, `beautifulsoup4`, `lxml`, `pymorphy3`, `pymorphy3-dicts-ru`.

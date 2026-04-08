@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 Общая обработка HTML корпуса: извлечение текста, токены, леммы (как в tokenize_lemmatize).
-Используется tokenize_lemmatize.py и boolean_search.py.
+Используется tokenize_lemmatize.py, boolean_search.py и tfidf_export.py.
 """
 
 from __future__ import annotations
 
 import re
+from collections import Counter
 from html import unescape
 from pathlib import Path
 
@@ -45,13 +46,14 @@ def html_to_text(html: str) -> str:
     return unescape(text)
 
 
-def extract_tokens_from_text(raw: str, stopwords: set[str]) -> set[str]:
+def count_tokens_in_text(raw: str, stopwords: set[str]) -> Counter[str]:
     """
-    Нижний регистр, буквенные токены; без цифр, не стоп-слова, длина >= MIN_TOKEN_LEN.
+    Частоты токенов с теми же фильтрами, что для множества уникальных токенов
+    (нижний регистр, буквы, без цифр, не стоп-слова, длина >= MIN_TOKEN_LEN).
     """
     raw = URL_RE.sub(" ", raw)
     lowered = raw.lower()
-    found: set[str] = set()
+    cnt: Counter[str] = Counter()
     for m in TOKEN_RE.finditer(lowered):
         t = m.group(0)
         if len(t) < MIN_TOKEN_LEN:
@@ -60,8 +62,13 @@ def extract_tokens_from_text(raw: str, stopwords: set[str]) -> set[str]:
             continue
         if t in stopwords:
             continue
-        found.add(t)
-    return found
+        cnt[t] += 1
+    return cnt
+
+
+def extract_tokens_from_text(raw: str, stopwords: set[str]) -> set[str]:
+    """Уникальные токены (ключи счётчика)."""
+    return set(count_tokens_in_text(raw, stopwords).keys())
 
 
 def lemma_for_token(token: str, morph: MorphAnalyzer) -> str:

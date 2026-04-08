@@ -2,3 +2,7 @@
 __pycache__/
 *.pyc
 .idea/
+
+# Большие артефакты TF-IDF (сгенерировать: python tfidf_export.py)
+tfidf_terms/
+tfidf_lemmas/

@@ -79,6 +79,34 @@ python boolean_search.py   # режим query> … до пустой строк�
 
 Приоритеты: **NOT** > **AND** > **OR**.
 
+## TF-IDF по документам
+
+Цепочка: `corpus/*.txt` → `python tokenize_lemmatize.py` → `python tfidf_export.py`.
+
+```bash
+python tokenize_lemmatize.py
+python tfidf_export.py
+# компактные файлы (только tf>0 в документе):
+python tfidf_export.py --sparse
+```
+
+| Артефакт | Назначение |
+|----------|------------|
+| `tfidf_terms/NNN.txt` | По строке из `tokens.txt`: `термин idf tf-idf` (10 знаков после запятой). |
+| `tfidf_lemmas/NNN.txt` | По строке из `lemmas.txt`: `лемма idf tf-idf`. |
+
+**Формулы:** \(|d|\) — сумма частот отфильтрованных токенов; tf термина = count/|d|; tf леммы = сумма count по формам из строки `lemmas.txt` / |d|; idf = ln((N+1)/(df+1)); tf-idf = tf×idf.
+
+По умолчанию в каждом файле столько строк, сколько терминов/лемм в словаре (полный вектор; нули у tf-idf допустимы). Каталоги `tfidf_terms/` и `tfidf_lemmas/` в `.gitignore` — для сдачи сгенерировать локально или `git add -f`.
+
+Проверка:
+
+```bash
+wc -l tfidf_terms/001.txt tfidf_lemmas/001.txt
+head -n 3 tfidf_terms/001.txt
+grep '^python ' tfidf_terms/001.txt tfidf_terms/002.txt   # idf у python совпадает
+```
+
 ## Проверка без запуска кода
 
 Преподаватель может убедиться в выполнении задания, открыв файлы в репозитории:

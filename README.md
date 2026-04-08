@@ -45,6 +45,24 @@ python tokenize_lemmatize.py
 
 Логика: из HTML удаляются `script`/`style`/`noscript`, текст токенизируется; русские слова лемматизируются через **pymorphy3**, чисто латинские токены (термины) — лемма совпадает с токеном.
 
+Общие функции обработки текста: [`corpus_text.py`](corpus_text.py) (используются `tokenize_lemmatize.py` и `boolean_search.py`).
+
+## Инвертированный индекс и булев поиск
+
+После заполнения [`corpus/`](corpus/):
+
+```bash
+python boolean_search.py build    # создать inverted_index.json
+python boolean_search.py          # интерактивный ввод запроса (строка не хардкодится)
+python boolean_search.py -q "(python AND код) OR telegram"
+```
+
+- **Индекс:** [`inverted_index.json`](inverted_index.json) — лемма → списки `doc_id` (те же правила нормализации, что при токенизации).
+- **Операторы:** `AND`, `OR`, `NOT` (без учёта регистра), скобки. **Приоритеты:** `NOT` сильнее `AND`, `AND` сильнее `OR` (т.е. `a OR b AND c` читается как `a OR (b AND c)`).
+- **Вывод:** `doc_id` и URL из [`index.txt`](index.txt).
+
+Код: [`boolean_search.py`](boolean_search.py).
+
 ## Зависимости
 
 См. [`requirements.txt`](requirements.txt): `requests`, `beautifulsoup4`, `lxml`, `pymorphy3`, `pymorphy3-dicts-ru`.

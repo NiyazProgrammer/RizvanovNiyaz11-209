@@ -107,6 +107,19 @@ head -n 3 tfidf_terms/001.txt
 grep '^python ' tfidf_terms/001.txt tfidf_terms/002.txt   # idf у python совпадает
 ```
 
+## Векторный поиск
+
+После `tfidf_export.py` (нужен каталог `tfidf_terms/`):
+
+```bash
+python vector_search.py
+python vector_search.py -q "python код" --top 10
+```
+
+Документы — разреженные TF-IDF векторы из `tfidf_terms/`; запрос нормализуется как корпус (`count_tokens_in_text`); вес в запросе: `tf_q × idf` (терм только если есть в словаре `tokens.txt`); ранжирование по **косинусу** между вектором запроса и документа.
+
+Булев индекс `inverted_index.json` для этого режима не используется.
+
 ## Проверка без запуска кода
 
 Преподаватель может убедиться в выполнении задания, открыв файлы в репозитории:

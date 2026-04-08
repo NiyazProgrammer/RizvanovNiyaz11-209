@@ -45,7 +45,7 @@ python tokenize_lemmatize.py
 
 Логика: из HTML удаляются `script`/`style`/`noscript`, текст токенизируется; русские слова лемматизируются через **pymorphy3**, чисто латинские токены (термины) — лемма совпадает с токеном.
 
-Общие функции обработки текста: [`corpus_text.py`](corpus_text.py) (используются `tokenize_lemmatize.py` и `boolean_search.py`).
+Общие функции обработки текста: [`corpus_text.py`](corpus_text.py) (используются `tokenize_lemmatize.py`, `boolean_search.py`, `tfidf_export.py`, `vector_search.py`).
 
 ## Инвертированный индекс и булев поиск
 
@@ -84,6 +84,22 @@ python tfidf_export.py --sparse   # только ненулевой tf в док
 Код: [`tfidf_export.py`](tfidf_export.py); частоты токенов — [`count_tokens_in_text`](corpus_text.py) в [`corpus_text.py`](corpus_text.py).
 
 Папки `tfidf_*` в [`.gitignore`](.gitignore) — при сдаче сгенерируйте локально или добавьте в коммит принудительно.
+
+## Векторный поиск (TF-IDF + косинус)
+
+Используются веса из [`tfidf_terms/`](tfidf_export.py) (не путать с булевым [`inverted_index.json`](boolean_search.py), где нет TF-IDF).
+
+```bash
+python vector_search.py
+python vector_search.py -q "python машинное обучение" --top 15
+```
+
+- **Документ:** разреженный вектор ненулевых `tf-idf` из `tfidf_terms/NNN.txt`, норма `||d||` = √(сумма квадратов весов).
+- **Запрос:** [`count_tokens_in_text`](corpus_text.py) по строке запроса; вес терма `tf_q × idf`, где `tf_q = count/|q|`, `idf` — как в корпусе; учитываются только термы из словаря [`tokens.txt`](tokens.txt).
+- **Оценка:** косинус `sim(q,d) = (q·d) / (||q||·||d||)`.
+- **Вывод:** `ранг`, `doc_id`, `score`, URL из [`index.txt`](index.txt).
+
+Код: [`vector_search.py`](vector_search.py).
 
 ## Зависимости
 

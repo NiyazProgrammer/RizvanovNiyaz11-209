@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Общая обработка HTML корпуса: извлечение текста, токены, леммы (как в tokenize_lemmatize).
-Используется tokenize_lemmatize.py, boolean_search.py и tfidf_export.py.
+Используется tokenize_lemmatize.py, boolean_search.py, tfidf_export.py и vector_search.py.
 """
 
 from __future__ import annotations

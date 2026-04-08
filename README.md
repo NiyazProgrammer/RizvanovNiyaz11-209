@@ -29,6 +29,22 @@ python crawl.py
 
 Если в репозитории нет папки `corpus/` (не закоммичена из‑за размера), проверка по инструкции в [`DEPLOYMENT.md`](DEPLOYMENT.md) — либо один раз выполнить команды из раздела «Установка и запуск».
 
+## Токенизация и лемматизация
+
+После того как заполнен каталог [`corpus/`](corpus/):
+
+```bash
+pip install -r requirements.txt
+python tokenize_lemmatize.py
+```
+
+- **Вход:** все `corpus/*.txt` (HTML), стоп-слова — [`ru_stopwords.txt`](ru_stopwords.txt).
+- **Выход:**
+  - [`tokens.txt`](tokens.txt) — уникальные токены, **одна строка = один токен** (нижний регистр, без чисел, союзов/предлогов из стоп-листа и «мусора» с цифрами).
+  - [`lemmas.txt`](lemmas.txt) — строки вида `лемма токен1 токен2 …` (леммы и токены в группе отсортированы по алфавиту).
+
+Логика: из HTML удаляются `script`/`style`/`noscript`, текст токенизируется; русские слова лемматизируются через **pymorphy3**, чисто латинские токены (термины) — лемма совпадает с токеном.
+
 ## Зависимости
 
-См. [`requirements.txt`](requirements.txt): `requests`, `beautifulsoup4`, `lxml`.
+См. [`requirements.txt`](requirements.txt): `requests`, `beautifulsoup4`, `lxml`, `pymorphy3`, `pymorphy3-dicts-ru`.

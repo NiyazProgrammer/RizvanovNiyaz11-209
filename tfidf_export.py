@@ -11,7 +11,7 @@ TF-IDF по каждому документу корпуса (задание 1) 
   tf(термин, d) = count(термин, d) / |d|,  |d| = 0 => tf = 0.
   tf(лемма, d) = (сумма count(форма, d) по формам из lemmas.txt) / |d|.
   df — число документов, где величина > 0.
-  idf = ln((N + 1) / (df + 1)).
+  idf = ln(1 + (N + 1) / (df + 1)).
   tf-idf = tf * idf.
 
 Выход (UTF-8, пробел как разделитель):
@@ -21,8 +21,8 @@ TF-IDF по каждому документу корпуса (задание 1) 
 Перед запуском: python tokenize_lemmatize.py (нужны tokens.txt и lemmas.txt).
 
 Запуск:
-  python tfidf_export.py
-  python tfidf_export.py --sparse   # только строки с tf > 0 в данном документе
+  python tfidf_export.py            # по умолчанию только ненулевые tf-idf строки
+  python tfidf_export.py --full     # полный словарь (в т.ч. нули)
 """
 
 from __future__ import annotations
@@ -48,8 +48,8 @@ LEMMAS_OUT_DIR = ROOT / "tfidf_lemmas"
 
 
 def idf_smoothed(df: int, n_docs: int) -> float:
-    """Сглаженный IDF: ln((N + 1) / (df + 1))."""
-    return math.log((n_docs + 1) / (df + 1))
+    """Положительный сглаженный IDF: ln(1 + (N + 1) / (df + 1))."""
+    return math.log(1.0 + (n_docs + 1) / (df + 1))
 
 
 def load_terms_ordered(path: Path) -> list[str]:
@@ -122,13 +122,14 @@ def write_doc_terms_file(
     idf_by_term: dict[str, float],
     counter,
     doc_total: int,
-    sparse: bool,
+    full_output: bool,
 ) -> None:
     lines: list[str] = []
     for t in terms:
         idf_t = idf_by_term[t]
         tf_t = (counter[t] / doc_total) if doc_total > 0 else 0.0
-        if sparse and tf_t == 0.0:
+        # По умолчанию не пишем нулевые tf-idf строки (tf=0).
+        if (not full_output) and tf_t == 0.0:
             continue
         tfidf = tf_t * idf_t
         lines.append(f"{t} {idf_t:.10f} {tfidf:.10f}")
@@ -141,13 +142,14 @@ def write_doc_lemmas_file(
     idf_by_lemma: dict[str, float],
     counter,
     doc_total: int,
-    sparse: bool,
+    full_output: bool,
 ) -> None:
     lines: list[str] = []
     for lemma, forms in rows:
         idf_l = idf_by_lemma[lemma]
         tf_l = lemma_tf(counter, forms, doc_total)
-        if sparse and tf_l == 0.0:
+        # По умолчанию не пишем нулевые tf-idf строки (tf=0).
+        if (not full_output) and tf_l == 0.0:
             continue
         tfidf = tf_l * idf_l
         lines.append(f"{lemma} {idf_l:.10f} {tfidf:.10f}")
@@ -157,9 +159,9 @@ def write_doc_lemmas_file(
 def main() -> int:
     parser = argparse.ArgumentParser(description="Экспорт TF-IDF по документам.")
     parser.add_argument(
-        "--sparse",
+        "--full",
         action="store_true",
-        help="Писать только термины/леммы с ненулевым tf в данном документе",
+        help="Писать полный словарь в каждом документе (включая нулевые tf-idf)",
     )
     args = parser.parse_args()
 
@@ -200,7 +202,7 @@ def main() -> int:
             idf_terms,
             c,
             doc_total,
-            args.sparse,
+            args.full,
         )
         write_doc_lemmas_file(
             LEMMAS_OUT_DIR / f"{stem}.txt",
@@ -208,10 +210,10 @@ def main() -> int:
             idf_lemmas,
             c,
             doc_total,
-            args.sparse,
+            args.full,
         )
 
-    mode = "sparse" if args.sparse else "полный словарь"
+    mode = "полный словарь" if args.full else "только ненулевые tf-idf строки"
     print(f"Готово ({mode}). {TERMS_OUT_DIR}/, {LEMMAS_OUT_DIR}/", flush=True)
     return 0
 

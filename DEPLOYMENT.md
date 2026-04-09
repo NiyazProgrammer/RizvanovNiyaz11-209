@@ -95,7 +95,7 @@ python tfidf_export.py --sparse
 | `tfidf_terms/NNN.txt` | По строке из `tokens.txt`: `термин idf tf-idf` (10 знаков после запятой). |
 | `tfidf_lemmas/NNN.txt` | По строке из `lemmas.txt`: `лемма idf tf-idf`. |
 
-**Формулы:** \(|d|\) — сумма частот отфильтрованных токенов; tf термина = count/|d|; tf леммы = сумма count по формам из строки `lemmas.txt` / |d|; idf = ln((N+1)/(df+1)); tf-idf = tf×idf.
+**Формулы:** \(|d|\) — сумма частот отфильтрованных токенов; tf термина = count/|d|; tf леммы = сумма count по формам из строки `lemmas.txt` / |d|; idf = ln(1 + (N+1)/(df+1)); tf-idf = tf×idf.
 
 По умолчанию в каждом файле столько строк, сколько терминов/лемм в словаре (полный вектор; нули у tf-idf допустимы). Каталоги `tfidf_terms/` и `tfidf_lemmas/` в `.gitignore` — для сдачи сгенерировать локально или `git add -f`.
 

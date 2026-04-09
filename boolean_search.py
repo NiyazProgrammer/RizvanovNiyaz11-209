@@ -331,9 +331,18 @@ def main() -> int:
 
     try:
         postings, universe = load_index()
-    except FileNotFoundError as e:
-        print(e, file=sys.stderr)
-        return 1
+    except FileNotFoundError:
+        # Удобный сценарий для первого запуска: автоматически строим индекс.
+        print(
+            "Файл inverted_index.json не найден. Выполняю автоматическую сборку индекса...",
+            flush=True,
+        )
+        try:
+            cmd_build()
+            postings, universe = load_index()
+        except FileNotFoundError as e:
+            print(e, file=sys.stderr)
+            return 1
 
     morph = MorphAnalyzer()
     urls = load_doc_urls()
